@@ -1,0 +1,54 @@
+services:
+  postgresql:
+    image: postgres:16-alpine
+    container_name: shopease_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: shopease
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shopease"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: shopease_backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgresql:5432/shopease
+      JWT_SECRET: shopease-super-secret-jwt-key-for-qa-portfolio-2026
+      JWT_EXPIRES_IN: 24h
+      CORS_ORIGIN: "*"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+
+  frontend:
+    container_name: shopease_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
