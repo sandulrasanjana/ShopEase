@@ -1,0 +1,102 @@
+name: CI - ShopEase Build & Database Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 1. Verify Backend TypeScript Compilation & Packaging
+  backend-build:
+    name: Backend Build & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Compile Backend TypeScript
+        working-directory: backend
+        run: npm run build
+
+  # 2. Verify Frontend TypeScript Compilation & Production Bundle
+  frontend-build:
+    name: Frontend Build & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Compile and Build Vite Production Bundle
+        working-directory: frontend
+        run: npm run build
+
+  # 3. Verify PostgreSQL Database Schema & Seed Data Execution
+  database-check:
+    name: Database Schema & Seed Validation
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: shopease
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Execute database/schema.sql
+        env:
+          PGPASSWORD: postgrespassword
+        run: |
+          psql -h localhost -p 5432 -U postgres -d shopease -f database/schema.sql
+
+      - name: Execute database/seed.sql
+        env:
+          PGPASSWORD: postgrespassword
+        run: |
+          psql -h localhost -p 5432 -U postgres -d shopease -f database/seed.sql
+
+      - name: Verify Seeded Data Integrity
+        env:
+          PGPASSWORD: postgrespassword
+        run: |
+          echo "Verifying products count:"
+          psql -h localhost -p 5432 -U postgres -d shopease -c "SELECT COUNT(*) AS total_products FROM products;"
+          echo "Verifying users count:"
+          psql -h localhost -p 5432 -U postgres -d shopease -c "SELECT role, COUNT(*) FROM users GROUP BY role;"
+

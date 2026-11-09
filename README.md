@@ -1,6 +1,7 @@
 # ShopEase - E-Commerce Web Application & QA Testing Benchmark
 
 ![ShopEase Status](https://img.shields.io/badge/Status-Ready%20for%20QA%20Testing-blue.svg)
+[![CI Status](https://github.com/sandulrasanjana/ShopEase/actions/workflows/ci.yml/badge.svg)](https://github.com/sandulrasanjana/ShopEase/actions/workflows/ci.yml)
 ![Frontend](https://img.shields.io/badge/Frontend-React%20%7C%20TypeScript%20%7C%20Vite-61dafb.svg)
 ![Backend](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express%20%7C%20TypeScript-green.svg)
 ![Database](https://img.shields.io/badge/Database-PostgreSQL-336791.svg)
