@@ -205,6 +205,61 @@
           }
         },
         {
+          "name": "Get Product Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/1/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1", "reviews"]
+            },
+            "description": "Public endpoint to retrieve customer reviews, overall average star rating, and distribution breakdown."
+          }
+        },
+        {
+          "name": "Submit Product Review (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Outstanding quality and lightning fast performance! Exceeded my expectations.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/1/reviews",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1", "reviews"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product Review",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/products/1/reviews/1",
+              "host": ["{{base_url}}"],
+              "path": ["products", "1", "reviews", "1"]
+            }
+          }
+        },
+        {
           "name": "Create Product (Admin Only)",
           "request": {
             "method": "POST",

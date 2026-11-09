@@ -22,8 +22,28 @@ export interface Product {
   price: number;
   stock: number;
   image: string;
+  rating?: number;
+  reviewCount?: number;
   createdAt: string;
   updatedAt?: string;
+}
+
+export interface Review {
+  id: number;
+  productId: number;
+  userId: number;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ReviewsResponse {
+  reviews: Review[];
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: Record<number, number>;
 }
 
 export interface CartItem {

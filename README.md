@@ -218,6 +218,9 @@ All API responses follow a uniform JSON structure:
 | `GET` | `/api/products` | Public | List products (search, filter, sort, paginate) | Query params: `search`, `category`, `minPrice`, `maxPrice`, `sort` |
 | `GET` | `/api/products/categories` | Public | Retrieve distinct product categories | None |
 | `GET` | `/api/products/:id` | Public | Retrieve detailed product by ID | None |
+| `GET` | `/api/products/:id/reviews` | Public | Retrieve product reviews, average rating & distribution | None |
+| `POST` | `/api/products/:id/reviews` | Authenticated | Submit product review & rating (1-5 stars) | `{ rating: number (1-5), comment: string }` |
+| `DELETE` | `/api/products/:id/reviews/:reviewId` | Authenticated | Delete own review (or any review as Admin) | None |
 | `POST` | `/api/products` | Admin Only | Create new catalog item | `{ name, description, category, price, stock, image }` |
 | `PUT` | `/api/products/:id` | Admin Only | Update existing product details | `{ name, description, category, price, stock, image }` |
 | `DELETE` | `/api/products/:id` | Admin Only | Delete product from catalog | None |
@@ -292,6 +295,15 @@ All interactive, state-bearing, and critical validation elements expose predicta
 | | `data-testid="product-quantity-decrease"`| Quantity decrement button |
 | | `data-testid="product-quantity-increase"`| Quantity increment button |
 | | `data-testid="add-to-cart"` | Add product to cart button |
+| **Reviews & Ratings** | `data-testid="reviews-section"` | Overall reviews and ratings section |
+| | `data-testid="reviews-average-score"` | Average rating number (e.g. 4.8) |
+| | `data-testid="reviews-total-count"` | Count of customer reviews |
+| | `data-testid="review-form"` | Customer review submission form |
+| | `data-testid="review-rating-select"` | Interactive star rating picker (1-5) |
+| | `data-testid="review-comment-input"` | Review text comment textarea |
+| | `data-testid="review-submit-btn"` | Submit review button |
+| | `data-testid="review-card"` | Individual customer review card |
+| | `data-testid="review-delete-btn"` | Delete review button |
 | **Cart** | `data-testid="cart-container"` | Shopping cart container |
 | | `data-testid="cart-item"` | Individual cart line item |
 | | `data-testid="cart-item-remove"` | Remove item button |

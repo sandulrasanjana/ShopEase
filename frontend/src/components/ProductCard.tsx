@@ -4,6 +4,7 @@ import { ShoppingCart, Check } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { StarRating } from './StarRating';
 
 interface ProductCardProps {
   product: Product;
@@ -71,6 +72,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <h3 className="product-title" data-testid="product-card-title" title={product.name}>
             {product.name}
           </h3>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }} data-testid="product-card-rating">
+            <StarRating rating={product.rating || 0} size={13} />
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              {product.rating && product.rating > 0 ? `${product.rating.toFixed(1)} (${product.reviewCount || 0})` : 'New'}
+            </span>
+          </div>
+
           <p className="product-description">{product.description}</p>
 
           <div className="product-footer">

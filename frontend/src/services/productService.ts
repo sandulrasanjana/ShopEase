@@ -1,5 +1,5 @@
 import api from './api';
-import { ApiResponse, Product, ProductFilterParams } from '../types';
+import { ApiResponse, Product, ProductFilterParams, Review, ReviewsResponse } from '../types';
 
 export const productService = {
   async getProducts(params?: ProductFilterParams): Promise<{ products: Product[]; pagination: any }> {
@@ -31,6 +31,20 @@ export const productService = {
 
   async deleteProduct(id: number | string): Promise<void> {
     await api.delete<ApiResponse>(`/products/${id}`);
+  },
+
+  async getProductReviews(productId: number | string): Promise<ReviewsResponse> {
+    const res = await api.get<ApiResponse<ReviewsResponse>>(`/products/${productId}/reviews`);
+    return res.data.data!;
+  },
+
+  async addReview(productId: number | string, data: { rating: number; comment: string }): Promise<Review> {
+    const res = await api.post<ApiResponse<{ review: Review }>>(`/products/${productId}/reviews`, data);
+    return res.data.data!.review;
+  },
+
+  async deleteReview(productId: number | string, reviewId: number | string): Promise<void> {
+    await api.delete<ApiResponse>(`/products/${productId}/reviews/${reviewId}`);
   },
 };
 

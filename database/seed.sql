@@ -74,3 +74,18 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Reset order items sequence
 SELECT setval('order_items_id_seq', (SELECT MAX(id) FROM order_items));
+
+-- 4. REVIEWS SEED (Initial realistic customer product reviews)
+INSERT INTO reviews (id, product_id, user_id, rating, comment, created_at) VALUES
+(1, 1, 2, 5, 'Exceptional performance and battery life. The OLED display is breathtaking!', NOW() - INTERVAL '5 days'),
+(2, 1, 3, 4, 'Super fast machine for coding and multitasking. The chassis feels very premium.', NOW() - INTERVAL '3 days'),
+(3, 2, 4, 5, 'Incredible portability and dead silent operation. M2 efficiency is remarkable.', NOW() - INTERVAL '4 days'),
+(4, 7, 2, 5, 'The active noise cancellation is unmatched for focused development work.', NOW() - INTERVAL '6 days'),
+(5, 7, 5, 4, 'Great sound clarity and rich bass. Very comfortable for long flight journeys.', NOW() - INTERVAL '2 days'),
+(6, 12, 3, 5, 'Ultra lightweight and pinpoint accurate sensor. No perceptible wireless delay.', NOW() - INTERVAL '1 day'),
+(7, 16, 4, 5, 'Next-gen gaming experience. Instant load times and stunning ray-traced visuals.', NOW() - INTERVAL '2 days')
+ON CONFLICT (id) DO NOTHING;
+
+-- Reset reviews sequence
+SELECT setval('reviews_id_seq', (SELECT MAX(id) FROM reviews));
+

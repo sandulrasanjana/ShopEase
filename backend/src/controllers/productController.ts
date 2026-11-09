@@ -13,14 +13,14 @@ export const getAllProducts = async (req: Request, res: Response): Promise<any> 
 
     // Search filter
     if (search && typeof search === 'string' && search.trim() !== '') {
-      conditions.push(`(LOWER(name) LIKE $${valueCounter} OR LOWER(description) LIKE $${valueCounter})`);
+      conditions.push(`(LOWER(p.name) LIKE $${valueCounter} OR LOWER(p.description) LIKE $${valueCounter})`);
       values.push(`%${search.trim().toLowerCase()}%`);
       valueCounter++;
     }
 
     // Category filter
     if (category && typeof category === 'string' && category.trim() !== '' && category.toLowerCase() !== 'all') {
-      conditions.push(`LOWER(category) = $${valueCounter}`);
+      conditions.push(`LOWER(p.category) = $${valueCounter}`);
       values.push(category.trim().toLowerCase());
       valueCounter++;
     }
@@ -29,7 +29,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<any> 
     if (minPrice !== undefined && minPrice !== '') {
       const min = Number(minPrice);
       if (!isNaN(min) && min >= 0) {
-        conditions.push(`price >= $${valueCounter}`);
+        conditions.push(`p.price >= $${valueCounter}`);
         values.push(min);
         valueCounter++;
       }
@@ -38,7 +38,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<any> 
     if (maxPrice !== undefined && maxPrice !== '') {
       const max = Number(maxPrice);
       if (!isNaN(max) && max >= 0) {
-        conditions.push(`price <= $${valueCounter}`);
+        conditions.push(`p.price <= $${valueCounter}`);
         values.push(max);
         valueCounter++;
       }
@@ -47,15 +47,15 @@ export const getAllProducts = async (req: Request, res: Response): Promise<any> 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     // Sorting
-    let orderByClause = 'ORDER BY created_at DESC';
+    let orderByClause = 'ORDER BY p.created_at DESC';
     if (sort === 'price_asc') {
-      orderByClause = 'ORDER BY price ASC';
+      orderByClause = 'ORDER BY p.price ASC';
     } else if (sort === 'price_desc') {
-      orderByClause = 'ORDER BY price DESC';
+      orderByClause = 'ORDER BY p.price DESC';
     } else if (sort === 'name_asc') {
-      orderByClause = 'ORDER BY name ASC';
+      orderByClause = 'ORDER BY p.name ASC';
     } else if (sort === 'name_desc') {
-      orderByClause = 'ORDER BY name DESC';
+      orderByClause = 'ORDER BY p.name DESC';
     }
 
     // Pagination
@@ -64,16 +64,20 @@ export const getAllProducts = async (req: Request, res: Response): Promise<any> 
     const offset = (pageNum - 1) * limitNum;
 
     // Total count query
-    const countSql = `SELECT COUNT(*) AS total FROM products ${whereClause}`;
+    const countSql = `SELECT COUNT(*) AS total FROM products p ${whereClause}`;
     const countResult = await query(countSql, values);
     const total = parseInt(countResult.rows[0].total, 10);
 
-    // Products query
+    // Products query with rating aggregates
     const sql = `
-      SELECT id, name, description, category, price::float AS price, stock, image,
-             created_at AS "createdAt", updated_at AS "updatedAt"
-      FROM products
+      SELECT p.id, p.name, p.description, p.category, p.price::float AS price, p.stock, p.image,
+             p.created_at AS "createdAt", p.updated_at AS "updatedAt",
+             COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0)::float AS rating,
+             COUNT(r.id)::int AS "reviewCount"
+      FROM products p
+      LEFT JOIN reviews r ON p.id = r.product_id
       ${whereClause}
+      GROUP BY p.id
       ${orderByClause}
       LIMIT $${valueCounter} OFFSET $${valueCounter + 1}
     `;
@@ -119,10 +123,14 @@ export const getProductById = async (req: Request, res: Response): Promise<any> 
     }
 
     const result = await query(
-      `SELECT id, name, description, category, price::float AS price, stock, image,
-              created_at AS "createdAt", updated_at AS "updatedAt"
-       FROM products
-       WHERE id = $1`,
+      `SELECT p.id, p.name, p.description, p.category, p.price::float AS price, p.stock, p.image,
+              p.created_at AS "createdAt", p.updated_at AS "updatedAt",
+              COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0)::float AS rating,
+              COUNT(r.id)::int AS "reviewCount"
+       FROM products p
+       LEFT JOIN reviews r ON p.id = r.product_id
+       WHERE p.id = $1
+       GROUP BY p.id`,
       [productId]
     );
 
